@@ -1,5 +1,8 @@
 package internal
 
+// Contains implementation for the Token interface for functions. Also includes a
+// code for running default commands and user functions, binding arguments.
+
 import (
 	"fmt"
 	"regexp"
@@ -38,6 +41,7 @@ func (o *FuncDefinition) String() string {
 	return out
 }
 
+// Run runs single cmd or another func
 func (o *CmdDef) Run(callArgs ...varType) {
 	log := logrus.WithField("cmd", o.Call)
 	cmdArgs, err := o.PopulateArgs(callArgs...)
@@ -196,6 +200,7 @@ func (o *CmdDef) Print() {
 	println()
 }
 
+// NewFuncToken returns token with function definition
 func NewFuncToken(key string, commands []*CmdDef) Token {
 	return &FuncDefinition{
 		Name: key,
@@ -204,39 +209,40 @@ func NewFuncToken(key string, commands []*CmdDef) Token {
 	}
 }
 
-// Create adds new variable to the global scope definition
+// CmdCreate adds new variable definition to the global scope
 func CmdCreate(name string, value varType) {
 	SetVar(name, value)
 }
 
-// Delete ..
+// CmdDelete removes variable definition from the global scope
 func CmdDelete(name string) {
 	DeleteVar(name)
 }
 
-// Update ..
+// CmdUpdate updates existing variable definition
 func CmdUpdate(name string, value varType) {
 	SetVar(name, value)
 }
 
-// Add ..
+// Add adds two operands
 func CmdAdd(arg1, arg2 varType) varType { return arg1 + arg2 }
 
-// Subtract ..
+// Subtract
 func CmdSubtract(arg1, arg2 varType) varType { return arg1 - arg2 }
 
-// Multiply ..
+// Multiply
 func CmdMultiply(arg1, arg2 varType) varType { return arg1 * arg2 }
 
-// Divide ..
+// Divide
 func CmdDivide(arg1, arg2 varType) varType { return arg1 / arg2 }
 
-// Print ..
+// Print
 func CmdPrint(arg varType) { fmt.Printf("%v\n", arg) }
 
 type DefaultCmdType int
 
 const (
+	// types of supported default functions
 	CmdCreateType DefaultCmdType = iota
 	CmdDeleteType
 	CmdUpdateType
@@ -258,6 +264,8 @@ var defaultCmd map[string]DefaultCmdType = map[string]DefaultCmdType{
 	"print":    CmdPrintType,
 }
 
+// IsDefaultCmd returns type of Cmd and true if the Cmd is default, returns
+// false otherwize
 func IsDefaultCmd(key string) (DefaultCmdType, bool) {
 	t, ok := defaultCmd[key]
 	return t, ok

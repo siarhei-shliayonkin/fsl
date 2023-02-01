@@ -1,5 +1,8 @@
 package internal
 
+// Contains code for the parser from input data format to internal document
+// format.
+
 import (
 	"encoding/json"
 	"errors"
@@ -120,7 +123,6 @@ func parseCmd(iter func() (*ojson.KVPair, bool)) (*CmdDef, error) {
 		if !ok {
 			break
 		}
-		// fmt.Printf("  %v: %v\n", cmdItemPair.Key, cmdItemPair.Value)
 
 		switch typeOfKey(cmdItemPair.Key) {
 		case CmdKeyTypeCmd:
@@ -189,7 +191,6 @@ var (
 	validCmdID       = regexp.MustCompile(`^id$`)
 	validCmdValueRef = regexp.MustCompile(`^value[0-9]*$`)
 	validCmdOperand  = regexp.MustCompile(`^operand[0-9]*$`)
-	// validCmdValue    = regexp.MustCompile(`^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$`)
 )
 
 func typeOfKey(key string) CmdKeyType {

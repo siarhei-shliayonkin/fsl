@@ -1,5 +1,7 @@
 package internal
 
+// Contains description of various types of argument definition
+
 import "fmt"
 
 type ArgType int
@@ -45,17 +47,3 @@ func (o ArgDef) String() string {
 	}
 	return out
 }
-
-// func NewArgOperandRef() ArgOperandRef { return "" }
-
-// func (o ArgDef) Populate() varType {
-// 	// TODO: switch o.ValType
-// 	return 1
-// }
-
-// type ArgValue interface {
-// 	Populate() varType
-// }
-
-// type ArgValueRef string
-// type ArgOperandRef string

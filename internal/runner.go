@@ -65,17 +65,12 @@ func (o *InputDoc) Process() {
 			if o.IsInitRequired(token.GetName()) {
 				o.RemoveFromInitRequired(token.GetName())
 			}
-
-			// if o.IsInitResolved() {
-			// 	runInitFunc()
-			// 	o.Meta.InitFuncIsPresent = false // prevent next init() call
-			// }
 		}
 	}
 
 	if o.IsInitResolved() {
 		runInitFunc()
-		o.Meta.InitFuncIsPresent = false // prevent next init() call
+		o.Meta.InitFuncIsPresent = false // prevent next init() call, if new doc doesn't contain init()
 	}
 }
 
@@ -96,6 +91,7 @@ func updateGlobalFuncDefinition(token Token) {
 	vd, ok := token.GetDefinition().(*FuncDefinition)
 	if !ok {
 		fmt.Printf("err: token.GetDefinition() for func %v\n", token.GetName())
+		return
 	}
 	SetFunc(token.GetName(), vd)
 }

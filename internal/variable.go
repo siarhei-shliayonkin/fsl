@@ -1,5 +1,7 @@
 package internal
 
+// Contains implementation for the Token interface for variable definition.
+
 import (
 	"encoding/json"
 	"errors"
