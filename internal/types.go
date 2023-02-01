@@ -23,9 +23,6 @@ type FuncDefinition struct {
 	Cmds []*CmdDef
 }
 
-// FuncMap stores actual fucntion definitions
-type FuncMap map[string]CmdDef
-
 // OperatorType ..
 // type OperatorType struct {
 // 	Cmd      string
@@ -38,28 +35,3 @@ type FuncMap map[string]CmdDef
 // 	ArgType string // TODO: const
 // 	ArgRef  string // format: "#var1", "$value2"
 // }
-
-type InputDocMeta struct {
-	InitFuncIsPresent bool
-	InitRequired      map[string]struct{} // names of functions required to run init()
-}
-
-type InputDoc struct {
-	Meta   InputDocMeta
-	Tokens []Token
-}
-
-func (o *InputDoc) AddInitRequiredFunc(name string) {
-	o.Meta.InitRequired[name] = struct{}{}
-}
-
-func (o *InputDoc) RemoveInitRequiredFunc(name string) {
-	delete(o.Meta.InitRequired, name)
-}
-
-func (o *InputDoc) IsInitFuncClarified() bool {
-	if o.Meta.InitFuncIsPresent && len(o.Meta.InitRequired) == 0 {
-		return true
-	}
-	return false
-}

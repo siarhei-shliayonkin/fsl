@@ -67,8 +67,9 @@ func ParseInput(jsonStr *string) (*InputDoc, error) {
 				}
 
 				if isInitFunc {
-					if !IsDefaultCmd(cmdDef.Call) {
-						inputDoc.Meta.InitRequired[pureFuncName(cmdDef.Call)] = struct{}{}
+					_, isDefault := IsDefaultCmd(cmdDef.Call)
+					if !isDefault {
+						inputDoc.Meta.InitRequired[pureName(cmdDef.Call)] = struct{}{}
 					}
 				}
 
@@ -87,7 +88,7 @@ func ParseInput(jsonStr *string) (*InputDoc, error) {
 }
 
 // pureFuncName supresses "#" before func name
-func pureFuncName(key string) string {
+func pureName(key string) string {
 	var out string
 	switch l := len(key); l {
 	case 0, 1:

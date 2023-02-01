@@ -44,14 +44,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	doc.PrintDoc()
-	// tokens := internal.ParseInput(&jsonData)
-	// println("\ntokens:")
-	// printSlice(tokens)
-}
+	// doc.PrintDoc()
 
-// func printSlice(ss []string) {
-// 	for _, v := range ss {
-// 		println(v)
-// 	}
-// }
+	doc.Process()
+}

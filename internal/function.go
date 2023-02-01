@@ -1,16 +1,23 @@
 package internal
 
-import "fmt"
+import (
+	"fmt"
+	"regexp"
+	"strconv"
+
+	"github.com/sirupsen/logrus"
+)
 
 var _ Token = (*FuncDefinition)(nil)
 
 func (FuncDefinition) GetType() TokenType            { return TokenTypeFunction }
 func (o *FuncDefinition) GetName() string            { return o.Name }
 func (o *FuncDefinition) GetDefinition() interface{} { return o }
+
 func (o *FuncDefinition) Print() {
 	fmt.Printf("%v\n", o.Name)
 	for _, v := range o.Cmds {
-		fmt.Printf("  call: %v", v.Call) //, v.Target, v.OperandRefs)
+		fmt.Printf("  call: %v", v.Call)
 		if len(v.Target) > 0 {
 			fmt.Printf(", target: %v", v.Target)
 		}
@@ -23,6 +30,172 @@ func (o *FuncDefinition) Print() {
 	}
 }
 
+func (o *FuncDefinition) String() string {
+	out := fmt.Sprintf("%v:", o.Name)
+	for _, cmd := range o.Cmds {
+		out += fmt.Sprintf(" %v", cmd.Call)
+	}
+	return out
+}
+
+func (o *CmdDef) Run(callArgs ...varType) {
+	log := logrus.WithField("cmd", o.Call)
+	cmdArgs, err := o.PopulateArgs(callArgs...)
+	if err != nil {
+		// log.Errorf("error populating arguments: %v", err)
+		fmt.Printf("undefined\n") // as part of requirements
+		return
+	}
+
+	t, isDefault := IsDefaultCmd(o.Call)
+	if isDefault {
+		msgUnexpectedCoutArgs := "unexpected count of arguments"
+
+		// o.Print()
+		switch t {
+		case CmdCreateType:
+			if len(cmdArgs) != 1 {
+				log.Error(msgUnexpectedCoutArgs)
+			}
+			CmdCreate(o.Target, cmdArgs[0])
+
+		case CmdDeleteType:
+			CmdDelete(o.Target)
+
+		case CmdUpdateType:
+			if len(cmdArgs) != 1 {
+				log.Error(msgUnexpectedCoutArgs)
+			}
+			CmdUpdate(o.Target, cmdArgs[0])
+
+		case CmdAddType:
+			if len(cmdArgs) != 2 {
+				log.Error(msgUnexpectedCoutArgs)
+			}
+			CmdUpdate(o.Target,
+				CmdAdd(cmdArgs[0], cmdArgs[1]),
+			)
+
+		case CmdSubtractType:
+			if len(cmdArgs) != 2 {
+				log.Error(msgUnexpectedCoutArgs)
+			}
+			CmdUpdate(o.Target,
+				CmdSubtract(cmdArgs[0], cmdArgs[1]),
+			)
+
+		case CmdMultiplyType:
+			if len(cmdArgs) != 2 {
+				log.Error(msgUnexpectedCoutArgs)
+			}
+			CmdUpdate(o.Target,
+				CmdMultiply(cmdArgs[0], cmdArgs[1]),
+			)
+
+		case CmdDivideType:
+			if len(cmdArgs) != 2 {
+				log.Error(msgUnexpectedCoutArgs)
+			}
+			CmdUpdate(o.Target,
+				CmdDivide(cmdArgs[0], cmdArgs[1]),
+			)
+
+		case CmdPrintType:
+			if len(cmdArgs) != 1 {
+				log.Error(msgUnexpectedCoutArgs)
+			}
+			CmdPrint(cmdArgs[0])
+		}
+
+		return
+	}
+
+	// another (user) func:
+	fn := pureName(o.Call)
+	// fmt.Printf("  fn: %v target:%v\n", fn, o.Target)
+
+	fd, ok := GetFunc(fn)
+	if !ok {
+		log.Error("undefined function call")
+		return
+	}
+
+	for _, cmd := range fd.Cmds {
+		if cmd.Target == "$id" {
+			cmd.Target = o.Target
+		}
+		cmd.Run(cmdArgs...)
+	}
+}
+
+func (o *CmdDef) PopulateArgs(callArgs ...varType) ([]varType, error) {
+	cmdArgs := make([]varType, 0, len(o.OperandRefs))
+
+	for _, or := range o.OperandRefs {
+		var arg varType
+
+		switch or.ValType {
+		case ArgTypeValue:
+			arg = or.Value
+
+		case ArgTypeValueRef:
+			var err error
+			arg, err = GetVar(pureName(or.ValueRef))
+			if err != nil {
+				return nil, fmt.Errorf("wrong arg reference %v: %v", or.ValueRef, err)
+			}
+
+		case ArgTypeOperandRef:
+			idx, err := IndexOfOperand(or.ValueRef)
+			if err != nil {
+				return nil, fmt.Errorf("bad operand %v: %v", or.ValueRef, err)
+			}
+
+			logrus.Debugf("operand idx: %v\n", idx)
+			if idx < 1 || idx > len(callArgs) {
+				return nil, fmt.Errorf("operand index is out of args range: %v(%v)", idx, len(callArgs))
+			}
+
+			// arguments counting starts from zero
+			idx--
+			arg = callArgs[idx]
+		}
+		cmdArgs = append(cmdArgs, arg)
+	}
+
+	return cmdArgs, nil
+}
+
+var reIndex = regexp.MustCompile(`^[\$|#][a-z]+`)
+
+func IndexOfOperand(opRef string) (int, error) {
+	if !reIndex.MatchString(opRef) {
+		return 0, fmt.Errorf("bad operand format %v", opRef)
+	}
+
+	parts := reIndex.Split(opRef, 2)
+
+	// if matched then always contains 2 parts
+	// if len(parts) != 2 {
+	// 	return 0, fmt.Errorf("bad operand reference value %v", opRef)
+	// }
+
+	val, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, fmt.Errorf("unexpected index value: %v", opRef)
+	}
+
+	return val, nil
+}
+
+func (o *CmdDef) Print() {
+	fmt.Printf("  call:%v, target:%v, op:", o.Call, o.Target)
+	for _, v := range o.OperandRefs {
+		fmt.Printf(" %v", v)
+	}
+	println()
+}
+
 func NewFuncToken(key string, commands []*CmdDef) Token {
 	return &FuncDefinition{
 		Name: key,
@@ -30,16 +203,6 @@ func NewFuncToken(key string, commands []*CmdDef) Token {
 		Cmds: commands,
 	}
 }
-
-// list of supported functions
-// - create
-// - delete
-// - update
-// - add
-// - subtract
-// - multiply
-// - divide
-// - print
 
 // Create adds new variable to the global scope definition
 func CmdCreate(name string, value varType) {
@@ -71,31 +234,6 @@ func CmdDivide(arg1, arg2 varType) varType { return arg1 / arg2 }
 // Print ..
 func CmdPrint(arg varType) { fmt.Printf("%v\n", arg) }
 
-// func NewOperatorDefinition(cmd string, target string, operands []string) *OperatorType {}
-
-// func (c *OperatorType) runCmd(args []varType) {
-// 	switch c.Cmd {
-// 	case "print":
-// 		if len(args) == 0 {
-// 			fmt.Printf("no arguments provided")
-// 			return
-// 		}
-// 		CmdPrint(args[0])
-// 	default:
-// 		fmt.Printf("operation %v is not supported", c.Cmd)
-// 	}
-// }
-
-// func (f *FuncDefinition) runFunc(operands []ArgumentDefinition) {
-// 	for _, op := range f.Operators {
-// 		// fmt.Printf("%v\n", op)
-
-// 		// TODO: args binding
-
-// 		op.runCmd([]varType{123})
-// 	}
-// }
-
 type DefaultCmdType int
 
 const (
@@ -120,26 +258,7 @@ var defaultCmd map[string]DefaultCmdType = map[string]DefaultCmdType{
 	"print":    CmdPrintType,
 }
 
-func IsDefaultCmd(key string) bool {
-	if _, ok := defaultCmd[key]; ok {
-		return true
-	}
-	return false
-}
-
-func (d *InputDoc) PrintDoc() {
-	// meta
-	println("-- new doc --")
-	println("Meta:")
-	println("  InitFuncIsPresent:", d.Meta.InitFuncIsPresent)
-	println("  InitRequired:")
-	for k := range d.Meta.InitRequired {
-		println("   ", k)
-	}
-
-	// tokens
-	println("--")
-	for _, v := range d.Tokens {
-		v.Print()
-	}
+func IsDefaultCmd(key string) (DefaultCmdType, bool) {
+	t, ok := defaultCmd[key]
+	return t, ok
 }
