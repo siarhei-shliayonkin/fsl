@@ -1,0 +1,23 @@
+namespace: fsl
+replicaCount: 1
+
+image:
+  repository: fsl
+  pullPolicy: IfNotPresent  
+  tag: "latest"
+
+# imagePullSecrets: []
+# nameOverride: "fsl"
+# fullnameOverride: "fsl-test"
+
+service:
+  type: ClusterIP
+  port: 8081
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

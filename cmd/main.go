@@ -1,27 +1,28 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
-
 	"github.com/siarhei-shliayonkin/fsl/api"
 	"github.com/siarhei-shliayonkin/fsl/internal"
 )
 
+// TODO: documenting func, var, etc.
+// TODO: UT
+
 func main() {
 	//runTestSample()
 
-	router := mux.NewRouter()
-	router.HandleFunc("/fsl_run", api.FSLRun).Methods("POST")
+	tcpPort := flag.Int("port", 8081, "Listening port.")
+	flag.Parse()
 
-	tcpPort := 8081 // TODO: configurable
 	s := &http.Server{
-		Addr:           fmt.Sprintf(":%d", tcpPort),
-		Handler:        router,
+		Addr:           fmt.Sprintf(":%d", *tcpPort),
+		Handler:        api.NewRouter(),
 		ReadTimeout:    time.Second * 10,
 		WriteTimeout:   time.Second * 10,
 		MaxHeaderBytes: http.DefaultMaxHeaderBytes,
@@ -30,6 +31,7 @@ func main() {
 	log.Fatal(s.ListenAndServe())
 }
 
+// for debug: runs sample processing directly w/o http server
 func runTestSample() {
 	jsonData := `{
 		"var1":1,

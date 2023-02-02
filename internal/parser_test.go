@@ -49,7 +49,6 @@ func Test_typeOfKey(t *testing.T) {
 			},
 			want: CmdKeyTypeOperand,
 		},
-		// TODO: Add test cases.
 	}
 
 	fmt.Printf("CmdKeyTypeCmd:%v, CmdKeyTypeID:%v\n", CmdKeyTypeCmd, CmdKeyTypeID)
