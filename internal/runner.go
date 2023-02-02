@@ -16,6 +16,17 @@ type InputDocMeta struct {
 type InputDoc struct {
 	Meta   InputDocMeta
 	Tokens []Token
+	Output []string
+}
+
+func NewInputDoc() *InputDoc {
+	return &InputDoc{
+		Meta: InputDocMeta{
+			InitRequired: map[string]struct{}{},
+		},
+		Tokens: make([]Token, 0, inputTokensDefaultSize),
+		Output: []string{}, // make([]string, 0, 5),
+	}
 }
 
 func (o *InputDoc) AddInitRequiredFunc(name string) {
@@ -69,7 +80,7 @@ func (o *InputDoc) Process() {
 	}
 
 	if o.IsInitResolved() {
-		runInitFunc()
+		o.Output = runInitFunc()
 		o.Meta.InitFuncIsPresent = false // prevent next init() call, if new doc doesn't contain init()
 	}
 }
@@ -96,16 +107,19 @@ func updateGlobalFuncDefinition(token Token) {
 	SetFunc(token.GetName(), vd)
 }
 
-func runInitFunc() {
+func runInitFunc() []string {
 	defer DeleteFunc("init")
+
+	output := []string{}
 
 	fd, ok := GetFunc("init")
 	if !ok {
-		fmt.Printf("err: init function not found")
+		logrus.Error("init function not found")
 	}
 
 	for _, cmd := range fd.Cmds {
 		logrus.Debugf("run init, cmd: %v", cmd)
-		cmd.Run()
+		output = append(output, cmd.Run()...)
 	}
+	return output
 }

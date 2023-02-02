@@ -2,14 +2,35 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"time"
 
+	"github.com/gorilla/mux"
+
+	"github.com/siarhei-shliayonkin/fsl/api"
 	"github.com/siarhei-shliayonkin/fsl/internal"
 )
 
 func main() {
-	// now just runs parser w/ test data sample.
-	// TODO: http server
+	//runTestSample()
 
+	router := mux.NewRouter()
+	router.HandleFunc("/fsl_run", api.FSLRun).Methods("POST")
+
+	tcpPort := 8081 // TODO: configurable
+	s := &http.Server{
+		Addr:           fmt.Sprintf(":%d", tcpPort),
+		Handler:        router,
+		ReadTimeout:    time.Second * 10,
+		WriteTimeout:   time.Second * 10,
+		MaxHeaderBytes: http.DefaultMaxHeaderBytes,
+	}
+
+	log.Fatal(s.ListenAndServe())
+}
+
+func runTestSample() {
 	jsonData := `{
 		"var1":1,
 		"var2":2,

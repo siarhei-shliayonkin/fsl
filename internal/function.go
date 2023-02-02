@@ -42,13 +42,16 @@ func (o *FuncDefinition) String() string {
 }
 
 // Run runs single cmd or another func
-func (o *CmdDef) Run(callArgs ...varType) {
+func (o *CmdDef) Run(callArgs ...varType) []string {
 	log := logrus.WithField("cmd", o.Call)
+	out := []string{}
+
 	cmdArgs, err := o.PopulateArgs(callArgs...)
 	if err != nil {
 		// log.Errorf("error populating arguments: %v", err)
-		fmt.Printf("undefined\n") // as part of requirements
-		return
+		// fmt.Printf("undefined\n") // as part of requirements
+		out = append(out, "undefined\n")
+		return out
 	}
 
 	t, isDefault := IsDefaultCmd(o.Call)
@@ -108,28 +111,27 @@ func (o *CmdDef) Run(callArgs ...varType) {
 			if len(cmdArgs) != 1 {
 				log.Error(msgUnexpectedCoutArgs)
 			}
-			CmdPrint(cmdArgs[0])
+			out = append(out, CmdPrint(cmdArgs[0]))
 		}
 
-		return
+		return out
 	}
 
 	// another (user) func:
 	fn := pureName(o.Call)
-	// fmt.Printf("  fn: %v target:%v\n", fn, o.Target)
-
 	fd, ok := GetFunc(fn)
 	if !ok {
 		log.Error("undefined function call")
-		return
+		return out
 	}
 
 	for _, cmd := range fd.Cmds {
 		if cmd.Target == "$id" {
 			cmd.Target = o.Target
 		}
-		cmd.Run(cmdArgs...)
+		out = append(out, cmd.Run(cmdArgs...)...)
 	}
+	return out
 }
 
 func (o *CmdDef) PopulateArgs(callArgs ...varType) ([]varType, error) {
@@ -237,7 +239,7 @@ func CmdMultiply(arg1, arg2 varType) varType { return arg1 * arg2 }
 func CmdDivide(arg1, arg2 varType) varType { return arg1 / arg2 }
 
 // Print
-func CmdPrint(arg varType) { fmt.Printf("%v\n", arg) }
+func CmdPrint(arg varType) string { return fmt.Sprintf("%v\n", arg) }
 
 type DefaultCmdType int
 

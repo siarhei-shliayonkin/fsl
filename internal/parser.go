@@ -18,15 +18,9 @@ import (
 const inputTokensDefaultSize = 10
 
 func ParseInput(jsonStr *string) (*InputDoc, error) {
-	inputDoc := InputDoc{
-		Meta: InputDocMeta{
-			InitRequired: map[string]struct{}{},
-		},
-		Tokens: make([]Token, 0, inputTokensDefaultSize),
-	}
-	//tokens := make([]Token, 0, inputTokensDefaultSize)
+	inputDoc := NewInputDoc()
+	om := ojson.NewOrderedMap()
 
-	var om *ojson.OrderedMap = ojson.NewOrderedMap()
 	err := json.Unmarshal([]byte(*jsonStr), om)
 	if err != nil {
 		return nil, err
@@ -87,7 +81,7 @@ func ParseInput(jsonStr *string) (*InputDoc, error) {
 		}
 	}
 
-	return &inputDoc, nil
+	return inputDoc, nil
 }
 
 // pureFuncName supresses "#" before func name
