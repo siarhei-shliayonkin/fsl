@@ -18,14 +18,14 @@ func main() {
 	//runTestSample()
 
 	tcpPort := flag.Int("port", 8081, "Listening port.")
+	timeout := flag.Duration("timeout", time.Second*5, "read/write timeout")
 	flag.Parse()
 
 	s := &http.Server{
-		Addr:           fmt.Sprintf(":%d", *tcpPort),
-		Handler:        api.NewRouter(),
-		ReadTimeout:    time.Second * 10,
-		WriteTimeout:   time.Second * 10,
-		MaxHeaderBytes: http.DefaultMaxHeaderBytes,
+		Addr:         fmt.Sprintf(":%d", *tcpPort),
+		Handler:      api.NewRouter(),
+		ReadTimeout:  *timeout,
+		WriteTimeout: *timeout,
 	}
 
 	log.Fatal(s.ListenAndServe())
