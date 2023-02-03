@@ -18,24 +18,6 @@ func (FuncDefinition) GetType() TokenType            { return TokenTypeFunction 
 func (o *FuncDefinition) GetName() string            { return o.Name }
 func (o *FuncDefinition) GetDefinition() interface{} { return o }
 
-// func (o *FuncDefinition) Debug() {
-// 	log := logrus.WithField("func", o.Name)
-
-// 	var debugStr string
-// 	for _, v := range o.Cmds {
-// 		debugStr = fmt.Sprintf("  call: %v", v.Call)
-// 		if len(v.Target) > 0 {
-// 			debugStr += fmt.Sprintf(", target: %v", v.Target)
-// 		}
-// 		if len(v.OperandRefs) > 0 {
-// 			for i, op := range v.OperandRefs {
-// 				debugStr += fmt.Sprintf(", op%d: %v", i, op)
-// 			}
-// 		}
-// 		log.Debug(debugStr)
-// 	}
-// }
-
 func (o *FuncDefinition) String() string {
 	out := fmt.Sprintf("%v:", o.Name)
 	for _, cmd := range o.Cmds {
@@ -87,7 +69,7 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 	return out
 }
 
-var ErrUnexpectedCoutArgs = errors.New("unexpected count of arguments")
+var ErrUnexpectedCountArgs = errors.New("unexpected count of arguments")
 
 func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, error) {
 	o.Debug()
@@ -96,7 +78,7 @@ func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, er
 	switch t {
 	case CmdCreateType:
 		if len(cmdArgs) != 1 {
-			return "", ErrUnexpectedCoutArgs
+			return "", ErrUnexpectedCountArgs
 		}
 		CmdCreate(o.Target, cmdArgs[0])
 
@@ -105,13 +87,13 @@ func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, er
 
 	case CmdUpdateType:
 		if len(cmdArgs) != 1 {
-			return "", ErrUnexpectedCoutArgs
+			return "", ErrUnexpectedCountArgs
 		}
 		CmdUpdate(o.Target, cmdArgs[0])
 
 	case CmdAddType:
 		if len(cmdArgs) != 2 {
-			return "", ErrUnexpectedCoutArgs
+			return "", ErrUnexpectedCountArgs
 		}
 		CmdUpdate(o.Target,
 			CmdAdd(cmdArgs[0], cmdArgs[1]),
@@ -119,7 +101,7 @@ func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, er
 
 	case CmdSubtractType:
 		if len(cmdArgs) != 2 {
-			return "", ErrUnexpectedCoutArgs
+			return "", ErrUnexpectedCountArgs
 		}
 		CmdUpdate(o.Target,
 			CmdSubtract(cmdArgs[0], cmdArgs[1]),
@@ -127,7 +109,7 @@ func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, er
 
 	case CmdMultiplyType:
 		if len(cmdArgs) != 2 {
-			return "", ErrUnexpectedCoutArgs
+			return "", ErrUnexpectedCountArgs
 		}
 		CmdUpdate(o.Target,
 			CmdMultiply(cmdArgs[0], cmdArgs[1]),
@@ -135,7 +117,7 @@ func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, er
 
 	case CmdDivideType:
 		if len(cmdArgs) != 2 {
-			return "", ErrUnexpectedCoutArgs
+			return "", ErrUnexpectedCountArgs
 		}
 		if cmdArgs[1] == 0 {
 			return "", fmt.Errorf("divide by zero")
@@ -146,7 +128,7 @@ func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, er
 
 	case CmdPrintType:
 		if len(cmdArgs) != 1 {
-			return "", ErrUnexpectedCoutArgs
+			return "", ErrUnexpectedCountArgs
 		}
 		out = CmdPrint(cmdArgs[0])
 	}
