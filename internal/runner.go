@@ -44,22 +44,22 @@ func (o *InputDoc) IsInitFuncClarified() bool {
 	return false
 }
 
-func (o *InputDoc) PrintDoc() {
-	// meta
-	println("-- new doc --")
-	println("Meta:")
-	println("  InitFuncIsPresent:", o.Meta.InitFuncIsPresent)
-	println("  InitRequired:")
-	for k := range o.Meta.InitRequired {
-		println("   ", k)
-	}
+// func (o *InputDoc) PrintDoc() {
+// 	// meta
+// 	println("-- new doc --")
+// 	println("Meta:")
+// 	println("  InitFuncIsPresent:", o.Meta.InitFuncIsPresent)
+// 	println("  InitRequired:")
+// 	for k := range o.Meta.InitRequired {
+// 		println("   ", k)
+// 	}
 
-	// tokens
-	println("--")
-	for _, v := range o.Tokens {
-		v.Print()
-	}
-}
+// 	// tokens
+// 	println("--")
+// 	for _, v := range o.Tokens {
+// 		v.Print()
+// 	}
+// }
 
 func (o *InputDoc) Process() {
 	for _, token := range o.Tokens {
@@ -118,7 +118,6 @@ func runInitFunc() []string {
 	}
 
 	for _, cmd := range fd.Cmds {
-		logrus.Debugf("run init, cmd: %v", cmd)
 		output = append(output, cmd.Run()...)
 	}
 	return output

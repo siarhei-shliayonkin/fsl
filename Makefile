@@ -23,7 +23,7 @@ bindir:
 	@if [ ! -d $(BIN_DIR) ]; then echo "binary dir does not exist, creating.."; mkdir -p $(BIN_DIR); fi
 
 test:
-	$(TEST) -v ./...
+	$(TEST) -cover ./...
 
 .PHONY: image image-run image-stop
 image: build

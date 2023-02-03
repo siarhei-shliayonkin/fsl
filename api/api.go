@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -18,10 +19,12 @@ func NewRouter() *mux.Router {
 	return r
 }
 
+// Root is used for a health check while deployed on the cluster
 func Root(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// FSLRun is a primary endpoint designed to accept input data and process it.
 func FSLRun(w http.ResponseWriter, r *http.Request) {
 	inputBytes, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -42,9 +45,7 @@ func FSLRun(w http.ResponseWriter, r *http.Request) {
 	doc.Process() // TODO: return err
 
 	var b bytes.Buffer
-	for _, s := range doc.Output {
-		b.WriteString(s)
-	}
+	b.WriteString(strings.Join(doc.Output, "\n"))
 
 	w.Header().Add("Content-Type", "text/plain")
 	w.Write(b.Bytes())

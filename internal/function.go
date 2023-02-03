@@ -4,6 +4,7 @@ package internal
 // code for running default commands and user functions, binding arguments.
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -17,21 +18,23 @@ func (FuncDefinition) GetType() TokenType            { return TokenTypeFunction 
 func (o *FuncDefinition) GetName() string            { return o.Name }
 func (o *FuncDefinition) GetDefinition() interface{} { return o }
 
-func (o *FuncDefinition) Print() {
-	fmt.Printf("%v\n", o.Name)
-	for _, v := range o.Cmds {
-		fmt.Printf("  call: %v", v.Call)
-		if len(v.Target) > 0 {
-			fmt.Printf(", target: %v", v.Target)
-		}
-		if len(v.OperandRefs) > 0 {
-			for i, op := range v.OperandRefs {
-				fmt.Printf(", op%d: %v", i, op)
-			}
-		}
-		println()
-	}
-}
+// func (o *FuncDefinition) Debug() {
+// 	log := logrus.WithField("func", o.Name)
+
+// 	var debugStr string
+// 	for _, v := range o.Cmds {
+// 		debugStr = fmt.Sprintf("  call: %v", v.Call)
+// 		if len(v.Target) > 0 {
+// 			debugStr += fmt.Sprintf(", target: %v", v.Target)
+// 		}
+// 		if len(v.OperandRefs) > 0 {
+// 			for i, op := range v.OperandRefs {
+// 				debugStr += fmt.Sprintf(", op%d: %v", i, op)
+// 			}
+// 		}
+// 		log.Debug(debugStr)
+// 	}
+// }
 
 func (o *FuncDefinition) String() string {
 	out := fmt.Sprintf("%v:", o.Name)
@@ -46,74 +49,23 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 	log := logrus.WithField("cmd", o.Call)
 	out := []string{}
 
-	cmdArgs, err := o.PopulateArgs(callArgs...)
+	cmdArgs, err := o.populateArgs(callArgs...)
 	if err != nil {
-		// log.Errorf("error populating arguments: %v", err)
-		// fmt.Printf("undefined\n") // as part of requirements
-		out = append(out, "undefined\n")
+		log.Errorf("error populating arguments: %v", err)
+		out = append(out, "undefined")
 		return out
 	}
 
 	t, isDefault := IsDefaultCmd(o.Call)
 	if isDefault {
-		msgUnexpectedCoutArgs := "unexpected count of arguments"
-
-		// o.Print()
-		switch t {
-		case CmdCreateType:
-			if len(cmdArgs) != 1 {
-				log.Error(msgUnexpectedCoutArgs)
-			}
-			CmdCreate(o.Target, cmdArgs[0])
-
-		case CmdDeleteType:
-			CmdDelete(o.Target)
-
-		case CmdUpdateType:
-			if len(cmdArgs) != 1 {
-				log.Error(msgUnexpectedCoutArgs)
-			}
-			CmdUpdate(o.Target, cmdArgs[0])
-
-		case CmdAddType:
-			if len(cmdArgs) != 2 {
-				log.Error(msgUnexpectedCoutArgs)
-			}
-			CmdUpdate(o.Target,
-				CmdAdd(cmdArgs[0], cmdArgs[1]),
-			)
-
-		case CmdSubtractType:
-			if len(cmdArgs) != 2 {
-				log.Error(msgUnexpectedCoutArgs)
-			}
-			CmdUpdate(o.Target,
-				CmdSubtract(cmdArgs[0], cmdArgs[1]),
-			)
-
-		case CmdMultiplyType:
-			if len(cmdArgs) != 2 {
-				log.Error(msgUnexpectedCoutArgs)
-			}
-			CmdUpdate(o.Target,
-				CmdMultiply(cmdArgs[0], cmdArgs[1]),
-			)
-
-		case CmdDivideType:
-			if len(cmdArgs) != 2 {
-				log.Error(msgUnexpectedCoutArgs)
-			}
-			CmdUpdate(o.Target,
-				CmdDivide(cmdArgs[0], cmdArgs[1]),
-			)
-
-		case CmdPrintType:
-			if len(cmdArgs) != 1 {
-				log.Error(msgUnexpectedCoutArgs)
-			}
-			out = append(out, CmdPrint(cmdArgs[0]))
+		s, err := o.runDefaultCmd(t, cmdArgs...)
+		if err != nil {
+			log.Errorf("run default cmd %v: %v", o.Call, err)
+			return out
 		}
-
+		if len(s) > 0 {
+			out = append(out, s)
+		}
 		return out
 	}
 
@@ -124,6 +76,7 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 		log.Error("undefined function call")
 		return out
 	}
+	log.Debug("user func call")
 
 	for _, cmd := range fd.Cmds {
 		if cmd.Target == "$id" {
@@ -134,7 +87,74 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 	return out
 }
 
-func (o *CmdDef) PopulateArgs(callArgs ...varType) ([]varType, error) {
+var ErrUnexpectedCoutArgs = errors.New("unexpected count of arguments")
+
+func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, error) {
+	o.Debug()
+	var out string
+
+	switch t {
+	case CmdCreateType:
+		if len(cmdArgs) != 1 {
+			return "", ErrUnexpectedCoutArgs
+		}
+		CmdCreate(o.Target, cmdArgs[0])
+
+	case CmdDeleteType:
+		CmdDelete(o.Target)
+
+	case CmdUpdateType:
+		if len(cmdArgs) != 1 {
+			return "", ErrUnexpectedCoutArgs
+		}
+		CmdUpdate(o.Target, cmdArgs[0])
+
+	case CmdAddType:
+		if len(cmdArgs) != 2 {
+			return "", ErrUnexpectedCoutArgs
+		}
+		CmdUpdate(o.Target,
+			CmdAdd(cmdArgs[0], cmdArgs[1]),
+		)
+
+	case CmdSubtractType:
+		if len(cmdArgs) != 2 {
+			return "", ErrUnexpectedCoutArgs
+		}
+		CmdUpdate(o.Target,
+			CmdSubtract(cmdArgs[0], cmdArgs[1]),
+		)
+
+	case CmdMultiplyType:
+		if len(cmdArgs) != 2 {
+			return "", ErrUnexpectedCoutArgs
+		}
+		CmdUpdate(o.Target,
+			CmdMultiply(cmdArgs[0], cmdArgs[1]),
+		)
+
+	case CmdDivideType:
+		if len(cmdArgs) != 2 {
+			return "", ErrUnexpectedCoutArgs
+		}
+		if cmdArgs[1] == 0 {
+			return "", fmt.Errorf("divide by zero")
+		}
+		CmdUpdate(o.Target,
+			CmdDivide(cmdArgs[0], cmdArgs[1]),
+		)
+
+	case CmdPrintType:
+		if len(cmdArgs) != 1 {
+			return "", ErrUnexpectedCoutArgs
+		}
+		out = CmdPrint(cmdArgs[0])
+	}
+
+	return out, nil
+}
+
+func (o *CmdDef) populateArgs(callArgs ...varType) ([]varType, error) {
 	cmdArgs := make([]varType, 0, len(o.OperandRefs))
 
 	for _, or := range o.OperandRefs {
@@ -152,12 +172,11 @@ func (o *CmdDef) PopulateArgs(callArgs ...varType) ([]varType, error) {
 			}
 
 		case ArgTypeOperandRef:
-			idx, err := IndexOfOperand(or.ValueRef)
+			idx, err := indexOfOperand(or.ValueRef)
 			if err != nil {
 				return nil, fmt.Errorf("bad operand %v: %v", or.ValueRef, err)
 			}
 
-			logrus.Debugf("operand idx: %v\n", idx)
 			if idx < 1 || idx > len(callArgs) {
 				return nil, fmt.Errorf("operand index is out of args range: %v(%v)", idx, len(callArgs))
 			}
@@ -174,7 +193,7 @@ func (o *CmdDef) PopulateArgs(callArgs ...varType) ([]varType, error) {
 
 var reIndex = regexp.MustCompile(`^[\$|#][a-z]+`)
 
-func IndexOfOperand(opRef string) (int, error) {
+func indexOfOperand(opRef string) (int, error) {
 	if !reIndex.MatchString(opRef) {
 		return 0, fmt.Errorf("bad operand format %v", opRef)
 	}
@@ -194,19 +213,22 @@ func IndexOfOperand(opRef string) (int, error) {
 	return val, nil
 }
 
-func (o *CmdDef) Print() {
-	fmt.Printf("  call:%v, target:%v, op:", o.Call, o.Target)
+func (o *CmdDef) Debug() {
+	log := logrus.WithField("cmd", o.Call)
+
+	var debugStr string
+	debugStr = fmt.Sprintf("  call:%v, target:%v, op:", o.Call, o.Target)
 	for _, v := range o.OperandRefs {
-		fmt.Printf(" %v", v)
+		debugStr += fmt.Sprintf(" %v", v)
 	}
-	println()
+	log.Debug(debugStr)
 }
 
 // NewFuncToken returns token with function definition
 func NewFuncToken(key string, commands []*CmdDef) Token {
 	return &FuncDefinition{
 		Name: key,
-		Args: []varType{},
+		// Args: []varType{},
 		Cmds: commands,
 	}
 }
@@ -239,7 +261,7 @@ func CmdMultiply(arg1, arg2 varType) varType { return arg1 * arg2 }
 func CmdDivide(arg1, arg2 varType) varType { return arg1 / arg2 }
 
 // Print
-func CmdPrint(arg varType) string { return fmt.Sprintf("%v\n", arg) }
+func CmdPrint(arg varType) string { return fmt.Sprintf("%v", arg) }
 
 type DefaultCmdType int
 

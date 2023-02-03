@@ -11,5 +11,4 @@ type Token interface {
 	GetType() TokenType
 	GetName() string
 	GetDefinition() interface{}
-	Print()
 }

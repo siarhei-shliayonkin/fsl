@@ -49,6 +49,13 @@ func Test_typeOfKey(t *testing.T) {
 			},
 			want: CmdKeyTypeOperand,
 		},
+		{
+			name: "undefined",
+			args: args{
+				key: "undefined",
+			},
+			want: CmdKeyTypeUndefined,
+		},
 	}
 
 	fmt.Printf("CmdKeyTypeCmd:%v, CmdKeyTypeID:%v\n", CmdKeyTypeCmd, CmdKeyTypeID)

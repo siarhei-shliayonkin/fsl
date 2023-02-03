@@ -9,17 +9,21 @@ import (
 
 	"github.com/siarhei-shliayonkin/fsl/api"
 	"github.com/siarhei-shliayonkin/fsl/internal"
+	"github.com/sirupsen/logrus"
 )
 
 // TODO: documenting func, var, etc.
-// TODO: UT
+// TODO: UT, 80% coverage
 
 func main() {
 	//runTestSample()
 
-	tcpPort := flag.Int("port", 8081, "Listening port.")
+	tcpPort := flag.Int("port", 8081, "istening port")
 	timeout := flag.Duration("timeout", time.Second*5, "read/write timeout")
+	verboseLevel := flag.Uint("v", 5, "verbose level")
 	flag.Parse()
+
+	logrus.SetLevel(logrus.Level(*verboseLevel))
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%d", *tcpPort),
