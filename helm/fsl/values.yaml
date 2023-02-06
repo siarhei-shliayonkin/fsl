@@ -7,8 +7,8 @@ image:
   tag: "latest"
 
 # imagePullSecrets: []
-# nameOverride: "fsl"
-# fullnameOverride: "fsl-test"
+# nameOverride: "fls"
+# fullnameOverride: "fls-test"
 
 service:
   type: ClusterIP

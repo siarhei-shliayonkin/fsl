@@ -12,11 +12,8 @@ import (
 	"github.com/siarhei-shliayonkin/fsl/api"
 )
 
-// TODO: documenting func, var, etc.
-// TODO: UT, 80% coverage
-
 func main() {
-	tcpPort := flag.Int("port", 8081, "istening port")
+	tcpPort := flag.Int("port", 8081, "listening port")
 	timeout := flag.Duration("timeout", time.Second*5, "read/write timeout")
 	verboseLevel := flag.Uint("v", 5, "verbose level")
 	flag.Parse()

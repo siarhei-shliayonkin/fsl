@@ -1,7 +1,7 @@
 # Simple fictitious scripting language (FSL) interpreter
 
 ## Project description
-This is a sample of test code which contains basic interpreter.
+This is a sample of test code for FSL interpreter.
 It should have possibility to read and process json input data in format represented in the following sample:
 ```json
 {
@@ -76,5 +76,17 @@ Service can be deployed on the cluster using helm templates. Configured cluster 
 Notice: When deployment starts the service image should be available on the cluster through the `docker pull` command. It can be organized with configuring any docker registry and putting the image into it.
 
 ## Server endpoints
- - POST /fsl_run - accepts input data in Json format, parses it and then runs init function (if present). 
+- GET /fsl/v1 - liveness/Readyness probe.
+- POST /fsl/v1/scripts - accepts input data in Json format, parses it and then runs init function (if present). 
   Returns result of processing input data in the http response.
+
+### Usage example
+Run the server by `make`. Open another terminal and put the following command:
+```
+$ echo '{
+  "var1": 111,
+  "init": [
+    {"cmd" : "print", "value": "#var1"}
+  ]
+}' | curl -X POST http://localhost:8081/fsl/v1/scripts -d@-
+```

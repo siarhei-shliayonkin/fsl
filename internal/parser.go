@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"regexp"
 	"strings"
@@ -17,11 +16,11 @@ import (
 
 const inputTokensDefaultSize = 10
 
-func ParseInput(jsonStr *string) (*InputDoc, error) {
+func ParseInput(jsonStr string) (*InputDoc, error) {
 	inputDoc := NewInputDoc()
 	om := ojson.NewOrderedMap()
 
-	err := json.Unmarshal([]byte(*jsonStr), om)
+	err := json.Unmarshal([]byte(jsonStr), om)
 	if err != nil {
 		return nil, err
 	}
@@ -37,13 +36,11 @@ func ParseInput(jsonStr *string) (*InputDoc, error) {
 		case reflect.String:
 			token := NewVarToken(pair.Key, pair.Value)
 			inputDoc.Tokens = append(inputDoc.Tokens, token)
-			// fmt.Printf("%v:%v\n", pair.Key, token.GetDefinition().(*VariableDefinition).Value)
 
 		// function definition
 		case reflect.Slice:
 			sliceValues := reflect.ValueOf(pair.Value)
 			commands := make([]*CmdDef, 0, sliceValues.Len())
-			// println(pair.Key)
 
 			var isInitFunc bool
 			if strings.Compare(pair.Key, "init") == 0 {
@@ -55,7 +52,7 @@ func ParseInput(jsonStr *string) (*InputDoc, error) {
 				sliceItemPtr := sliceValues.Index(i).Elem()
 				funcDefinition, ok := sliceItemPtr.Interface().(*ojson.OrderedMap)
 				if !ok {
-					log.Fatalln("internal error: function definition is not a (*ojson.OrderedMap) type")
+					return nil, fmt.Errorf("internal error: function definition is not a (*ojson.OrderedMap) type")
 				}
 
 				cmdDef, err := parseCmd(funcDefinition.EntriesIter())
@@ -74,7 +71,6 @@ func ParseInput(jsonStr *string) (*InputDoc, error) {
 			}
 			token := NewFuncToken(pair.Key, commands)
 			inputDoc.Tokens = append(inputDoc.Tokens, token)
-			// println()
 
 		default:
 			fmt.Printf("warning: unexpected object %v (%v)\n", pair.Key, oType)
@@ -97,7 +93,6 @@ func pureName(key string) string {
 		}
 		out = string(r)
 	}
-
 	return out
 }
 

@@ -12,20 +12,23 @@ import (
 	"github.com/siarhei-shliayonkin/fsl/internal"
 )
 
+const baseURL = "/fsl/v1"
+
+// NewRouter returns handles router
 func NewRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/", Root).Methods("GET")
-	r.HandleFunc("/fsl_run", FSLRun).Methods("POST")
+	r.HandleFunc(baseURL, Live).Methods("GET")
+	r.HandleFunc(baseURL+"/scripts", Script).Methods("POST")
 	return r
 }
 
-// Root is used for a health check while deployed on the cluster
-func Root(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+// Live is used for a health check while deployed on the cluster
+func Live(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
 }
 
-// FSLRun is a primary endpoint designed to accept input data and process it.
-func FSLRun(w http.ResponseWriter, r *http.Request) {
+// Script is a primary endpoint designed to accept input data and process it.
+func Script(w http.ResponseWriter, r *http.Request) {
 	inputBytes, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -36,13 +39,13 @@ func FSLRun(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonData := string(inputBytes)
-	doc, err := internal.ParseInput(&jsonData)
+	doc, err := internal.ParseInput(jsonData)
 	if err != nil {
 		logrus.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	doc.Process() // TODO: return err
+	doc.Process()
 
 	var b bytes.Buffer
 	b.WriteString(strings.Join(doc.Output, "\n"))
@@ -50,3 +53,5 @@ func FSLRun(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain")
 	w.Write(b.Bytes())
 }
+
+// TODO: type ResponseMessage

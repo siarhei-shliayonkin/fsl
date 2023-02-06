@@ -330,6 +330,7 @@ func TestCmdDef_Run(t *testing.T) {
 		Cmds: []*CmdDef{cmd},
 	}
 	SetFunc("sum", fd)
+	defer DeleteFunc("sum")
 	_ = fd.GetType()
 	_ = fd.GetName()
 	_ = fd.GetDefinition()

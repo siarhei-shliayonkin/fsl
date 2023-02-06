@@ -33,7 +33,7 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 
 	cmdArgs, err := o.populateArgs(callArgs...)
 	if err != nil {
-		log.Errorf("error populating arguments: %v", err)
+		log.Warningf("error populating arguments: %v", err)
 		out = append(out, "undefined")
 		return out
 	}

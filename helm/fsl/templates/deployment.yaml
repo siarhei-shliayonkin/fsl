@@ -28,12 +28,16 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
+            initialDelaySeconds: 3
+            timeoutSeconds: 10
             httpGet:
-              path: /
+              path: /fsl/v1
               port: http
           readinessProbe:
+            initialDelaySeconds: 3
+            timeoutSeconds: 10
             httpGet:
-              path: /
+              path: /fsl/v1
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

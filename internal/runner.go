@@ -25,7 +25,7 @@ func NewInputDoc() *InputDoc {
 			InitRequired: map[string]struct{}{},
 		},
 		Tokens: make([]Token, 0, inputTokensDefaultSize),
-		Output: []string{}, // make([]string, 0, 5),
+		Output: []string{},
 	}
 }
 
@@ -43,23 +43,6 @@ func (o *InputDoc) IsInitFuncClarified() bool {
 	}
 	return false
 }
-
-// func (o *InputDoc) PrintDoc() {
-// 	// meta
-// 	println("-- new doc --")
-// 	println("Meta:")
-// 	println("  InitFuncIsPresent:", o.Meta.InitFuncIsPresent)
-// 	println("  InitRequired:")
-// 	for k := range o.Meta.InitRequired {
-// 		println("   ", k)
-// 	}
-
-// 	// tokens
-// 	println("--")
-// 	for _, v := range o.Tokens {
-// 		v.Print()
-// 	}
-// }
 
 func (o *InputDoc) Process() {
 	for _, token := range o.Tokens {

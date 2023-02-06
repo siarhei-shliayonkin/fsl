@@ -21,6 +21,10 @@ var (
 )
 
 func init() {
+	InitGlobals()
+}
+
+func InitGlobals() {
 	vars = make(varMap)
 	funcs = make(map[string]*FuncDefinition)
 }
