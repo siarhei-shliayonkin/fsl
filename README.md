@@ -68,7 +68,10 @@ By default, the server available on the `8081` port.
 ### Running in a docker container
 Build docker image: `make image`.
 
-Run previously created image: `make image-run`. 
+Run previously created image: `make image-run`.
+
+### Using docker-compose
+Use `make up` and `make down` to start stop service using docker-compose.
 
 ## Deployment
 Service can be deployed on the cluster using helm templates. Configured cluster with established connection is required as well as helm command. Use command like the `helm install fsl --namespace=fsl helm/fsl` to deploy service. The namespace is optional here.

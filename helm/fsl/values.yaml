@@ -6,10 +6,6 @@ image:
   pullPolicy: IfNotPresent  
   tag: "latest"
 
-# imagePullSecrets: []
-# nameOverride: "fls"
-# fullnameOverride: "fls-test"
-
 service:
   type: ClusterIP
   port: 8081

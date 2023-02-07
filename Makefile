@@ -35,3 +35,10 @@ image-run:
 
 image-stop:
 	docker stop $(PROJECT_NAME)
+
+.PHONY: up down
+up: 
+	@docker-compose up -d
+
+down:
+	@docker-compose down
