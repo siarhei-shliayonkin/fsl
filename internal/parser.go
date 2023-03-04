@@ -80,7 +80,7 @@ func ParseInput(jsonStr string) (*InputDoc, error) {
 	return inputDoc, nil
 }
 
-// pureFuncName supresses "#" before func name
+// pureFuncName suppresses "#" before func name
 func pureName(key string) string {
 	var out string
 	switch l := len(key); l {
@@ -159,7 +159,7 @@ func parseCmd(iter func() (*ojson.KVPair, bool)) (*CmdDef, error) {
 			cmd.OperandRefs = append(cmd.OperandRefs, arg)
 
 		default:
-			return nil, fmt.Errorf("unexpexted cmd key: %v", cmdItemPair.Key)
+			return nil, fmt.Errorf("unexpected cmd key: %v", cmdItemPair.Key)
 		}
 	}
 	return cmd, nil

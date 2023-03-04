@@ -1,8 +1,10 @@
 # Simple fictitious scripting language (FSL) interpreter
 
 ## Project description
+
 This is a sample of test code for FSL interpreter.
 It should have possibility to read and process json input data in format represented in the following sample:
+
 ```json
 {
   "var1":1,
@@ -34,8 +36,10 @@ It should have possibility to read and process json input data in format represe
   ]
 }
 ```
+
 Expected response is the following:
-```
+
+```txt
 3.5
 5.5
 undefined
@@ -44,6 +48,7 @@ undefined
 ```
 
 Other requirements:
+
 - The finished project must support receiving multiple FSL scripts.
 - Functions and variables must persist between FSL scripts.
 - Resolve conflicts by overwriting existing variables or functions.
@@ -58,6 +63,7 @@ Other requirements:
 - Function calls are defined in the “cmd” attribute by preceding the function name with a hash mark (#).
 
 ## Build & run
+
 Installed Golang of any version is required. The project was written with Go v1.18. Before first run vendor packages should be populated. It can be done by running the following command: `go mod tidy` in the project root directory.
 
 Use `make test` to run unit tests.
@@ -66,26 +72,32 @@ Use `make` to build & run http server on the local host.
 By default, the server available on the `8081` port. Use another terminal to reach the service or `Ctrl+C` to stop it.
 
 ### Running in a docker container
+
 Build docker image: `make image`.
 
 Run previously created image: `make image-run`.
 
 ### Using docker-compose
+
 Use `make up` and `make down` to start/stop service using docker-compose.
 
 ## Deployment
+
 Service can be deployed on the cluster using helm templates. Configured cluster with established connection is required as well as helm command. Use command like the `helm install fsl --namespace=fsl helm/fsl` to deploy service. The namespace is optional here.
 
 Notice: When deployment starts the service image should be available on the cluster through the `docker pull` command. It can be organized with configuring any docker registry and putting the image into it.
 
 ## Server endpoints
-- GET /fsl/v1 - liveness/Readyness probe.
+
+- GET /fsl/v1 - Liveness/Readiness probe.
 - POST /fsl/v1/scripts - accepts input data in Json format, parses it and then runs init function (if present).
   Returns result of processing input data in the http response.
 
 ### Usage example
+
 Run the server by `make`. Open another terminal and put the following command:
-```
+
+```bash
 $ echo '{
   "var1": 111,
   "init": [
@@ -93,4 +105,5 @@ $ echo '{
   ]
 }' | curl -X POST http://localhost:8081/fsl/v1/scripts -d@- ; echo
 ```
+
 Expected output: `111`

@@ -8,7 +8,7 @@ import (
 	"errors"
 )
 
-// FuncMap stores actual fucntion definitions
+// FuncMap stores actual function definitions
 type FuncMap map[string]*FuncDefinition
 
 var (

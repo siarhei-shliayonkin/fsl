@@ -271,7 +271,7 @@ var defaultCmd map[string]DefaultCmdType = map[string]DefaultCmdType{
 }
 
 // IsDefaultCmd returns type of Cmd and true if the Cmd is default, returns
-// false otherwize
+// false otherwise
 func IsDefaultCmd(key string) (DefaultCmdType, bool) {
 	t, ok := defaultCmd[key]
 	return t, ok

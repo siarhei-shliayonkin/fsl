@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -27,5 +26,5 @@ func main() {
 		WriteTimeout: *timeout,
 	}
 
-	log.Fatal(s.ListenAndServe())
+	logrus.Fatal(s.ListenAndServe())
 }
