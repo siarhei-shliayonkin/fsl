@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  fsl:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    container_name: fsl
+    ports:
+      - "8081:8081"

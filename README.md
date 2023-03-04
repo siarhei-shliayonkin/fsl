@@ -7,11 +7,11 @@ It should have possibility to read and process json input data in format represe
 {
   "var1":1,
   "var2":2,
-  
+
   "init": [
     {"cmd" : "#setup" }
   ],
-  
+
   "setup": [
     {"cmd":"update", "id": "var1", "value":3.5},
     {"cmd":"print", "value": "#var1"},
@@ -21,7 +21,7 @@ It should have possibility to read and process json input data in format represe
     {"cmd":"delete", "id": "var1"},
     {"cmd":"#printAll"}
   ],
-  
+
   "sum": [
       {"cmd":"add", "id": "$id", "operand1":"$value1", "operand2":"$value2"}
   ],
@@ -44,10 +44,10 @@ undefined
 ```
 
 Other requirements:
-- The finished project must support receiving multiple FSL scripts. 
-- Functions and variables must persist between FSL scripts. 
+- The finished project must support receiving multiple FSL scripts.
+- Functions and variables must persist between FSL scripts.
 - Resolve conflicts by overwriting existing variables or functions.
-- The system will create a representation of the script processed. 
+- The system will create a representation of the script processed.
 - The init function is immediately called after each script is processed.
 - The input is a JSON object of named variables and named functions
 - Variables are defined as a key value pair.
@@ -62,8 +62,8 @@ Installed Golang of any version is required. The project was written with Go v1.
 
 Use `make test` to run unit tests.
 
-Use `make` to build & run http server on the local host. 
-By default, the server available on the `8081` port.
+Use `make` to build & run http server on the local host.
+By default, the server available on the `8081` port. Use another terminal to reach the service or `Ctrl+C` to stop it.
 
 ### Running in a docker container
 Build docker image: `make image`.
@@ -71,7 +71,7 @@ Build docker image: `make image`.
 Run previously created image: `make image-run`.
 
 ### Using docker-compose
-Use `make up` and `make down` to start stop service using docker-compose.
+Use `make up` and `make down` to start/stop service using docker-compose.
 
 ## Deployment
 Service can be deployed on the cluster using helm templates. Configured cluster with established connection is required as well as helm command. Use command like the `helm install fsl --namespace=fsl helm/fsl` to deploy service. The namespace is optional here.
@@ -80,7 +80,7 @@ Notice: When deployment starts the service image should be available on the clus
 
 ## Server endpoints
 - GET /fsl/v1 - liveness/Readyness probe.
-- POST /fsl/v1/scripts - accepts input data in Json format, parses it and then runs init function (if present). 
+- POST /fsl/v1/scripts - accepts input data in Json format, parses it and then runs init function (if present).
   Returns result of processing input data in the http response.
 
 ### Usage example
@@ -91,5 +91,6 @@ $ echo '{
   "init": [
     {"cmd" : "print", "value": "#var1"}
   ]
-}' | curl -X POST http://localhost:8081/fsl/v1/scripts -d@-
+}' | curl -X POST http://localhost:8081/fsl/v1/scripts -d@- ; echo
 ```
+Expected output: `111`
