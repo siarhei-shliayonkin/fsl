@@ -4,7 +4,6 @@ package internal
 // code for running default commands and user functions, binding arguments.
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -34,7 +33,7 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 
 	cmdArgs, err := o.populateArgs(callArgs...)
 	if err != nil {
-		log.Warningf("error populating arguments: %v", err)
+		log.Warningf(MsgPopulateArguments, err)
 		out = append(out, "undefined")
 		return out
 	}
@@ -43,7 +42,7 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 	if isDefault {
 		s, err := o.runDefaultCmd(cmdType, cmdArgs...)
 		if err != nil {
-			log.Errorf("run default cmd %v: %v", o.Call, err)
+			log.Errorf(MsgDefaultCmdRun, o.Call, err)
 			return out
 		}
 		if len(s) > 0 {
@@ -56,7 +55,7 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 	fn := strings.TrimPrefix(o.Call, "#")
 	fd, ok := GetFunc(fn)
 	if !ok {
-		log.Error("undefined function call")
+		log.Error(ErrUndefinedFunction)
 		return out
 	}
 	log.Debug("user func call")
@@ -69,8 +68,6 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 	}
 	return out
 }
-
-var ErrUnexpectedCountArgs = errors.New("unexpected count of arguments")
 
 func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, error) {
 	o.Debug()
@@ -121,7 +118,7 @@ func (o *CmdDef) runDefaultCmd(t DefaultCmdType, cmdArgs ...varType) (string, er
 			return "", ErrUnexpectedCountArgs
 		}
 		if cmdArgs[1] == 0 {
-			return "", fmt.Errorf("divide by zero")
+			return "", ErrDivideByZero
 		}
 		CmdUpdate(o.Target,
 			CmdDivide(cmdArgs[0], cmdArgs[1]),
@@ -151,21 +148,17 @@ func (o *CmdDef) populateArgs(callArgs ...varType) ([]varType, error) {
 			var err error
 			arg, err = GetVar(strings.TrimPrefix(or.ValueRef, "#"))
 			if err != nil {
-				return nil, fmt.Errorf("wrong arg reference %v: %v", or.ValueRef, err)
+				return nil, fmt.Errorf(MsgWrongArgReference, or.ValueRef, err)
 			}
 
 		case ArgTypeOperandRef:
 			idx, err := indexOfOperand(or.ValueRef)
 			if err != nil {
-				return nil, fmt.Errorf("bad operand %v: %v", or.ValueRef, err)
+				return nil, fmt.Errorf(MsgBadOperand, or.ValueRef, err)
 			}
 
 			if idx < 1 || idx > len(callArgs) {
-				return nil, fmt.Errorf(
-					"operand index is out of args range: %v(%v)",
-					idx,
-					len(callArgs),
-				)
+				return nil, fmt.Errorf(MsgOperandOutOfRange, idx, len(callArgs))
 			}
 
 			// arguments counting starts from zero
@@ -182,13 +175,13 @@ var reIndex = regexp.MustCompile(`^[\$|#][a-z]+`)
 
 func indexOfOperand(opRef string) (int, error) {
 	if !reIndex.MatchString(opRef) {
-		return 0, fmt.Errorf("bad operand format %v", opRef)
+		return 0, fmt.Errorf(MsgBadOperandFormat, opRef)
 	}
 
 	parts := reIndex.Split(opRef, 2)
 	val, err := strconv.Atoi(parts[1])
 	if err != nil {
-		return 0, fmt.Errorf("unexpected index value: %v", opRef)
+		return 0, fmt.Errorf(MsgUnexpectedIndex, opRef)
 	}
 	return val, nil
 }

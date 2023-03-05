@@ -5,7 +5,6 @@ package internal
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -36,7 +35,7 @@ func ParseInput(data []byte) (*InputDoc, error) {
 		case reflect.String:
 			token, err := NewVarToken(pair.Key, pair.Value)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf(MsgBadToken, pair.Key, pair.Value, err)
 			}
 			inputDoc.Tokens = append(inputDoc.Tokens, token)
 
@@ -55,14 +54,12 @@ func ParseInput(data []byte) (*InputDoc, error) {
 				sliceItemPtr := sliceValues.Index(i).Elem()
 				funcDefinition, ok := sliceItemPtr.Interface().(*ojson.OrderedMap)
 				if !ok {
-					return nil, fmt.Errorf(
-						"internal error: function definition is not a (*ojson.OrderedMap) type",
-					)
+					return nil, ErrIsNotOrderedMap
 				}
 
 				cmdDef, err := parseCmd(funcDefinition.EntriesIter())
 				if err != nil {
-					return nil, fmt.Errorf("error parsing cmd definition: %v", err)
+					return nil, fmt.Errorf(MsgParsingCmdDefinition, err)
 				}
 
 				if isInitFunc {
@@ -93,7 +90,6 @@ func NewCmdDef() *CmdDef {
 }
 
 func parseCmd(iter func() (*ojson.KVPair, bool)) (*CmdDef, error) {
-	ErrUnexpectedValue := errors.New("unexpected type of value")
 	badValueMsg := "bad %v value : %v:%v\n"
 	cmd := NewCmdDef()
 
@@ -149,7 +145,7 @@ func parseCmd(iter func() (*ojson.KVPair, bool)) (*CmdDef, error) {
 			cmd.OperandRefs = append(cmd.OperandRefs, arg)
 
 		default:
-			return nil, fmt.Errorf("unexpected cmd key: %v", cmdItemPair.Key)
+			return nil, fmt.Errorf(MsgUnexpectedCmdKey, cmdItemPair.Key)
 		}
 	}
 	return cmd, nil

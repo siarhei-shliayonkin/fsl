@@ -4,16 +4,8 @@ package internal
   Represents global storage for variable and function definitions.
 */
 
-import (
-	"errors"
-)
-
 // FuncMap stores actual function definitions
 type FuncMap map[string]*FuncDefinition
-
-var (
-	ErrVarNotFound = errors.New("var not found")
-)
 
 var (
 	vars  varMap

@@ -94,10 +94,9 @@ func runInitFunc() []string {
 	defer DeleteFunc("init")
 
 	output := []string{}
-
 	fd, ok := GetFunc("init")
 	if !ok {
-		logrus.Error("init function not found")
+		logrus.Error(ErrInitFunctionNotFound)
 	}
 
 	for _, cmd := range fd.Cmds {

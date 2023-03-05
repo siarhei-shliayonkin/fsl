@@ -4,16 +4,13 @@ package internal
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-
-	"github.com/sirupsen/logrus"
 )
 
 func NewVarToken(id string, value interface{}) (Token, error) {
 	val, err := getVarValue(value)
 	if err != nil {
-		logrus.WithError(err).Error("variable token")
+		return nil, err
 	}
 	return &VariableDefinition{
 		Name:  id,
@@ -30,8 +27,6 @@ func (o *VariableDefinition) Print() {
 	fmt.Printf("%v:%v\n", o.Name, o.Value)
 }
 
-var ErrVarIsNotNumber = errors.New("variable is not a number")
-
 func getVarValue(value interface{}) (varType, error) {
 	pairVal, ok := value.(json.Number)
 	if !ok {
@@ -42,6 +37,5 @@ func getVarValue(value interface{}) (varType, error) {
 	if err != nil {
 		return 0, ErrVarIsNotNumber
 	}
-
-	return varType(v), err
+	return varType(v), nil
 }
