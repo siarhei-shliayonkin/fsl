@@ -6,18 +6,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+
+	"github.com/sirupsen/logrus"
 )
 
-func NewVarToken(id string, value interface{}) Token {
+func NewVarToken(id string, value interface{}) (Token, error) {
 	val, err := getVarValue(value)
 	if err != nil {
-		log.Fatalln(err)
+		logrus.WithError(err).Error("variable token")
 	}
 	return &VariableDefinition{
 		Name:  id,
 		Value: val,
-	}
+	}, nil
 }
 
 var _ Token = (*VariableDefinition)(nil)

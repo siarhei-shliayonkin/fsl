@@ -41,7 +41,7 @@ func Script(w http.ResponseWriter, r *http.Request) {
 	jsonData := string(inputBytes)
 	doc, err := internal.ParseInput(jsonData)
 	if err != nil {
-		logrus.Error(err)
+		logrus.WithError(err).Error("parsing data")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

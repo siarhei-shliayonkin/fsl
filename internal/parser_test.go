@@ -75,6 +75,12 @@ func Test_typeOfKey(t *testing.T) {
 }
 
 func TestParseInput(t *testing.T) {
+	tokenForVar := func(key, val string) Token {
+		token, err := NewVarToken(key, json.Number(val))
+		assert.NoError(t, err)
+		return token
+	}
+
 	type args struct {
 		jsonStr string
 	}
@@ -108,8 +114,8 @@ func TestParseInput(t *testing.T) {
 			want: &InputDoc{
 				Meta: InputDocMeta{},
 				Tokens: []Token{
-					NewVarToken("var1", json.Number("11")),
-					NewVarToken("var2", json.Number("12")),
+					tokenForVar("var1", "11"),
+					tokenForVar("var2", "12"),
 				},
 				Output: []string{},
 			},

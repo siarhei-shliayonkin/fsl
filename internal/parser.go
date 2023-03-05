@@ -34,7 +34,10 @@ func ParseInput(jsonStr string) (*InputDoc, error) {
 
 		switch oType := reflect.TypeOf(pair.Value).Kind(); oType {
 		case reflect.String:
-			token := NewVarToken(pair.Key, pair.Value)
+			token, err := NewVarToken(pair.Key, pair.Value)
+			if err != nil {
+				return nil, err
+			}
 			inputDoc.Tokens = append(inputDoc.Tokens, token)
 
 		// function definition
@@ -52,7 +55,9 @@ func ParseInput(jsonStr string) (*InputDoc, error) {
 				sliceItemPtr := sliceValues.Index(i).Elem()
 				funcDefinition, ok := sliceItemPtr.Interface().(*ojson.OrderedMap)
 				if !ok {
-					return nil, fmt.Errorf("internal error: function definition is not a (*ojson.OrderedMap) type")
+					return nil, fmt.Errorf(
+						"internal error: function definition is not a (*ojson.OrderedMap) type",
+					)
 				}
 
 				cmdDef, err := parseCmd(funcDefinition.EntriesIter())

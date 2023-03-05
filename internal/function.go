@@ -160,7 +160,11 @@ func (o *CmdDef) populateArgs(callArgs ...varType) ([]varType, error) {
 			}
 
 			if idx < 1 || idx > len(callArgs) {
-				return nil, fmt.Errorf("operand index is out of args range: %v(%v)", idx, len(callArgs))
+				return nil, fmt.Errorf(
+					"operand index is out of args range: %v(%v)",
+					idx,
+					len(callArgs),
+				)
 			}
 
 			// arguments counting starts from zero
