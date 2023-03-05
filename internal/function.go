@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -38,9 +39,9 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 		return out
 	}
 
-	t, isDefault := IsDefaultCmd(o.Call)
+	cmdType, isDefault := IsDefaultCmd(o.Call)
 	if isDefault {
-		s, err := o.runDefaultCmd(t, cmdArgs...)
+		s, err := o.runDefaultCmd(cmdType, cmdArgs...)
 		if err != nil {
 			log.Errorf("run default cmd %v: %v", o.Call, err)
 			return out
@@ -52,7 +53,7 @@ func (o *CmdDef) Run(callArgs ...varType) []string {
 	}
 
 	// another (user) func:
-	fn := pureName(o.Call)
+	fn := strings.TrimPrefix(o.Call, "#")
 	fd, ok := GetFunc(fn)
 	if !ok {
 		log.Error("undefined function call")
@@ -148,7 +149,7 @@ func (o *CmdDef) populateArgs(callArgs ...varType) ([]varType, error) {
 
 		case ArgTypeValueRef:
 			var err error
-			arg, err = GetVar(pureName(or.ValueRef))
+			arg, err = GetVar(strings.TrimPrefix(or.ValueRef, "#"))
 			if err != nil {
 				return nil, fmt.Errorf("wrong arg reference %v: %v", or.ValueRef, err)
 			}
@@ -185,17 +186,10 @@ func indexOfOperand(opRef string) (int, error) {
 	}
 
 	parts := reIndex.Split(opRef, 2)
-
-	// if matched then always contains 2 parts
-	// if len(parts) != 2 {
-	// 	return 0, fmt.Errorf("bad operand reference value %v", opRef)
-	// }
-
 	val, err := strconv.Atoi(parts[1])
 	if err != nil {
 		return 0, fmt.Errorf("unexpected index value: %v", opRef)
 	}
-
 	return val, nil
 }
 

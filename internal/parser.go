@@ -68,7 +68,8 @@ func ParseInput(data []byte) (*InputDoc, error) {
 				if isInitFunc {
 					_, isDefault := IsDefaultCmd(cmdDef.Call)
 					if !isDefault {
-						inputDoc.Meta.InitRequired[pureName(cmdDef.Call)] = struct{}{}
+						key := strings.TrimPrefix(cmdDef.Call, "#")
+						inputDoc.Meta.InitRequired[key] = struct{}{}
 					}
 				}
 
@@ -83,22 +84,6 @@ func ParseInput(data []byte) (*InputDoc, error) {
 	}
 
 	return inputDoc, nil
-}
-
-// pureFuncName suppresses "#" before func name
-func pureName(key string) string {
-	var out string
-	switch l := len(key); l {
-	case 0, 1:
-		out = key
-	default:
-		r := []rune(key)
-		if r[0] == '#' {
-			r = r[1:]
-		}
-		out = string(r)
-	}
-	return out
 }
 
 func NewCmdDef() *CmdDef {
