@@ -14,13 +14,13 @@ import (
 	ojson "gitlab.com/c0b/go-ordered-json"
 )
 
-const inputTokensDefaultSize = 10
+const inputTokensDefaultCount = 10
 
-func ParseInput(jsonStr string) (*InputDoc, error) {
+func ParseInput(data []byte) (*InputDoc, error) {
 	inputDoc := NewInputDoc()
 	om := ojson.NewOrderedMap()
 
-	err := json.Unmarshal([]byte(jsonStr), om)
+	err := json.Unmarshal(data, om)
 	if err != nil {
 		return nil, err
 	}

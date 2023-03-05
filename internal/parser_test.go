@@ -82,7 +82,7 @@ func TestParseInput(t *testing.T) {
 	}
 
 	type args struct {
-		jsonStr string
+		data []byte
 	}
 	tests := []struct {
 		name    string
@@ -93,7 +93,7 @@ func TestParseInput(t *testing.T) {
 		{
 			name: "1, empty",
 			args: args{
-				jsonStr: "{}",
+				data: []byte("{}"),
 			},
 			want:    NewInputDoc(),
 			wantErr: false,
@@ -101,7 +101,7 @@ func TestParseInput(t *testing.T) {
 		{
 			name: "1, bad",
 			args: args{
-				jsonStr: "",
+				data: []byte(""),
 			},
 			want:    nil,
 			wantErr: true,
@@ -109,7 +109,7 @@ func TestParseInput(t *testing.T) {
 		{
 			name: "2, vars",
 			args: args{
-				jsonStr: `{"var1":11, "var2":12}`,
+				data: []byte(`{"var1":11, "var2":12}`),
 			},
 			want: &InputDoc{
 				Meta: InputDocMeta{},
@@ -124,7 +124,7 @@ func TestParseInput(t *testing.T) {
 		{
 			name: "2, func",
 			args: args{
-				jsonStr: `{"init": [ {"cmd" : "#setup" } ]}`,
+				data: []byte(`{"init": [ {"cmd" : "#setup" } ]}`),
 			},
 			want: &InputDoc{
 				Meta: InputDocMeta{},
@@ -141,7 +141,7 @@ func TestParseInput(t *testing.T) {
 		{
 			name: "3, func, bad cmd",
 			args: args{
-				jsonStr: `{"init": [ {"cmd":"print", "val": "#var1"} ]}`,
+				data: []byte(`{"init": [ {"cmd":"print", "val": "#var1"} ]}`),
 			},
 			want: &InputDoc{
 				Meta: InputDocMeta{},
@@ -158,7 +158,7 @@ func TestParseInput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseInput(tt.args.jsonStr)
+			got, err := ParseInput(tt.args.data)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseInput() error = %v, wantErr %v", err, tt.wantErr)
 				return

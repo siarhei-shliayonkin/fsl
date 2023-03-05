@@ -24,7 +24,7 @@ func NewInputDoc() *InputDoc {
 		Meta: InputDocMeta{
 			InitRequired: map[string]struct{}{},
 		},
-		Tokens: make([]Token, 0, inputTokensDefaultSize),
+		Tokens: make([]Token, 0, inputTokensDefaultCount),
 		Output: []string{},
 	}
 }
