@@ -15,8 +15,8 @@ import (
 
 const inputTokensDefaultCount = 10
 
-func ParseInput(data []byte) (*InputDoc, error) {
-	inputDoc := NewInputDoc()
+func ParseInput(data []byte) (*Script, error) {
+	script := NewScript()
 	om := ojson.NewOrderedMap()
 
 	err := json.Unmarshal(data, om)
@@ -37,7 +37,7 @@ func ParseInput(data []byte) (*InputDoc, error) {
 			if err != nil {
 				return nil, fmt.Errorf(MsgBadToken, pair.Key, pair.Value, err)
 			}
-			inputDoc.Tokens = append(inputDoc.Tokens, token)
+			script.Tokens = append(script.Tokens, token)
 
 		// function definition
 		case reflect.Slice:
@@ -47,7 +47,7 @@ func ParseInput(data []byte) (*InputDoc, error) {
 			var isInitFunc bool
 			if strings.Compare(pair.Key, "init") == 0 {
 				isInitFunc = true
-				inputDoc.Meta.InitFuncIsPresent = true
+				script.Meta.InitFuncIsPresent = true
 			}
 
 			for i := 0; i < sliceValues.Len(); i++ {
@@ -66,21 +66,21 @@ func ParseInput(data []byte) (*InputDoc, error) {
 					_, isDefault := IsDefaultCmd(cmdDef.Call)
 					if !isDefault {
 						key := strings.TrimPrefix(cmdDef.Call, "#")
-						inputDoc.Meta.InitRequired[key] = struct{}{}
+						script.Meta.InitRequired[key] = struct{}{}
 					}
 				}
 
 				commands = append(commands, cmdDef)
 			}
 			token := NewFuncToken(pair.Key, commands)
-			inputDoc.Tokens = append(inputDoc.Tokens, token)
+			script.Tokens = append(script.Tokens, token)
 
 		default:
 			fmt.Printf("warning: unexpected object %v (%v)\n", pair.Key, oType)
 		}
 	}
 
-	return inputDoc, nil
+	return script, nil
 }
 
 func NewCmdDef() *CmdDef {

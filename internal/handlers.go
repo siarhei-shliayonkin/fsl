@@ -17,7 +17,7 @@ const baseURL = "/fsl/v1"
 func NewRouter() *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc(baseURL, Live).Methods("GET")
-	r.HandleFunc(baseURL+"/scripts", Script).Methods("POST")
+	r.HandleFunc(baseURL+"/scripts", Calculate).Methods("POST")
 	return r
 }
 
@@ -27,7 +27,7 @@ func Live(w http.ResponseWriter, r *http.Request) {
 }
 
 // Script is a primary endpoint designed to accept input data and process it.
-func Script(w http.ResponseWriter, r *http.Request) {
+func Calculate(w http.ResponseWriter, r *http.Request) {
 	inputBytes, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -37,15 +37,15 @@ func Script(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	doc, err := ParseInput(inputBytes)
+	script, err := ParseInput(inputBytes)
 	if err != nil {
 		http.Error(w, fmt.Errorf(MsgParsingData, err).Error(), http.StatusBadRequest)
 		return
 	}
-	doc.Process()
+	script.Run()
 
 	var b bytes.Buffer
-	b.WriteString(strings.Join(doc.Output, "\n"))
+	b.WriteString(strings.Join(script.Output, "\n"))
 
 	w.Header().Add("Content-Type", "text/plain")
 	w.Write(b.Bytes())

@@ -8,20 +8,20 @@ import (
 
 // Processing the document created from the input data
 
-type InputDocMeta struct {
+type ScriptMeta struct {
 	InitFuncIsPresent bool
 	InitRequired      map[string]struct{} // names of functions required to run init()
 }
 
-type InputDoc struct {
-	Meta   InputDocMeta
+type Script struct {
+	Meta   ScriptMeta
 	Tokens []Token
 	Output []string
 }
 
-func NewInputDoc() *InputDoc {
-	return &InputDoc{
-		Meta: InputDocMeta{
+func NewScript() *Script {
+	return &Script{
+		Meta: ScriptMeta{
 			InitRequired: map[string]struct{}{},
 		},
 		Tokens: make([]Token, 0, inputTokensDefaultCount),
@@ -29,22 +29,22 @@ func NewInputDoc() *InputDoc {
 	}
 }
 
-func (o *InputDoc) AddInitRequiredFunc(name string) {
+func (o *Script) AddInitRequiredFunc(name string) {
 	o.Meta.InitRequired[name] = struct{}{}
 }
 
-func (o *InputDoc) RemoveInitRequiredFunc(name string) {
+func (o *Script) RemoveInitRequiredFunc(name string) {
 	delete(o.Meta.InitRequired, name)
 }
 
-func (o *InputDoc) IsInitFuncClarified() bool {
+func (o *Script) IsInitFuncClarified() bool {
 	if o.Meta.InitFuncIsPresent && len(o.Meta.InitRequired) == 0 {
 		return true
 	}
 	return false
 }
 
-func (o *InputDoc) Process() {
+func (o *Script) Run() {
 	for _, token := range o.Tokens {
 		switch token.GetType() {
 		case TokenTypeVariable:
@@ -68,16 +68,16 @@ func (o *InputDoc) Process() {
 	}
 }
 
-func (o *InputDoc) RemoveFromInitRequired(name string) {
+func (o *Script) RemoveFromInitRequired(name string) {
 	delete(o.Meta.InitRequired, name)
 }
 
-func (o *InputDoc) IsInitRequired(name string) bool {
+func (o *Script) IsInitRequired(name string) bool {
 	_, ok := o.Meta.InitRequired[name]
 	return ok
 }
 
-func (o *InputDoc) IsInitResolved() bool {
+func (o *Script) IsInitResolved() bool {
 	return o.Meta.InitFuncIsPresent && len(o.Meta.InitRequired) == 0
 }
 

@@ -87,7 +87,7 @@ func TestParseInput(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *InputDoc
+		want    *Script
 		wantErr bool
 	}{
 		{
@@ -95,7 +95,7 @@ func TestParseInput(t *testing.T) {
 			args: args{
 				data: []byte("{}"),
 			},
-			want:    NewInputDoc(),
+			want:    NewScript(),
 			wantErr: false,
 		},
 		{
@@ -111,8 +111,8 @@ func TestParseInput(t *testing.T) {
 			args: args{
 				data: []byte(`{"var1":11, "var2":12}`),
 			},
-			want: &InputDoc{
-				Meta: InputDocMeta{},
+			want: &Script{
+				Meta: ScriptMeta{},
 				Tokens: []Token{
 					tokenForVar("var1", "11"),
 					tokenForVar("var2", "12"),
@@ -126,8 +126,8 @@ func TestParseInput(t *testing.T) {
 			args: args{
 				data: []byte(`{"init": [ {"cmd" : "#setup" } ]}`),
 			},
-			want: &InputDoc{
-				Meta: InputDocMeta{},
+			want: &Script{
+				Meta: ScriptMeta{},
 				Tokens: []Token{
 					NewFuncToken("init", []*CmdDef{{
 						Call:        "#setup",
@@ -143,8 +143,8 @@ func TestParseInput(t *testing.T) {
 			args: args{
 				data: []byte(`{"init": [ {"cmd":"print", "val": "#var1"} ]}`),
 			},
-			want: &InputDoc{
-				Meta: InputDocMeta{},
+			want: &Script{
+				Meta: ScriptMeta{},
 				Tokens: []Token{
 					NewFuncToken("init", []*CmdDef{{
 						Call:        "print",
