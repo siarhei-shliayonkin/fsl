@@ -1,4 +1,4 @@
-package api
+package internal
 
 import (
 	"bytes"
@@ -9,8 +9,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-
-	"github.com/siarhei-shliayonkin/fsl/internal"
 )
 
 const baseURL = "/fsl/v1"
@@ -39,9 +37,9 @@ func Script(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	doc, err := internal.ParseInput(inputBytes)
+	doc, err := ParseInput(inputBytes)
 	if err != nil {
-		http.Error(w, fmt.Errorf(internal.MsgParsingData, err).Error(), http.StatusBadRequest)
+		http.Error(w, fmt.Errorf(MsgParsingData, err).Error(), http.StatusBadRequest)
 		return
 	}
 	doc.Process()

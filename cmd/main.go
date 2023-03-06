@@ -8,7 +8,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/siarhei-shliayonkin/fsl/api"
+	"github.com/siarhei-shliayonkin/fsl/internal"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%d", *tcpPort),
-		Handler:      api.NewRouter(),
+		Handler:      internal.NewRouter(),
 		ReadTimeout:  *timeout,
 		WriteTimeout: *timeout,
 	}

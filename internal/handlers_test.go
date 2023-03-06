@@ -1,4 +1,4 @@
-package api
+package internal
 
 import (
 	"io/ioutil"
@@ -6,8 +6,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/siarhei-shliayonkin/fsl/internal"
 )
 
 // integation test for http server
@@ -16,11 +14,11 @@ var testSamples = []string{
 	`{
 	"var1":1,
 	"var2":2,
-	
+
 	"init": [
 	  {"cmd" : "#setup" }
 	],
-	
+
 	"setup": [
 	  {"cmd":"update", "id": "var1", "value":3.5},
 	  {"cmd":"print", "value": "#var1"},
@@ -30,11 +28,11 @@ var testSamples = []string{
 	  {"cmd":"delete", "id": "var1"},
 	  {"cmd":"#printAll"}
 	],
-	
+
 	"sum": [
 		{"cmd":"add", "id": "$id", "operand1":"$value1", "operand2":"$value2"}
 	],
-  
+
 	"printAll":
 	[
 	  {"cmd":"print", "value": "#var1"},
@@ -51,7 +49,7 @@ undefined
 	"init": [
 	  {"cmd" : "#setup" }
 	],
-	
+
 	"setup": [
 	  {"cmd":"create", "id": "var1", "value":10},
 	  {"cmd":"print", "value": "#var1"},
@@ -93,7 +91,7 @@ func check(t *testing.T, got, want string) {
 }
 
 func Test_httpServer(t *testing.T) {
-	internal.InitGlobals()
+	InitGlobals()
 	srv := httptest.NewServer(NewRouter())
 	defer srv.Close()
 
